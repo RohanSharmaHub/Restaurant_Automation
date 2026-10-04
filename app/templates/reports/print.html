@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Sales report · print{% endblock %}
+{% block content %}
+<div class="d-print-none mb-3 d-flex gap-2">
+  <a href="{{ url_for('reports.sales', preset='7d') }}" class="btn btn-link">&larr; back</a>
+  <button class="btn btn-primary ms-auto" onclick="window.print()">Print this report</button>
+</div>
+<style>@media print { nav, footer, .d-print-none { display: none !important; } body { background: #fff; } }</style>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="h4 mb-0">RestoAuto</h1>
+    <div class="text-muted small">Sales report</div>
+    <div class="text-muted small">
+      {{ start.strftime("%Y-%m-%d") }} to {{ end.strftime("%Y-%m-%d") }}
+    </div>
+    <hr>
+    <div class="row mb-3">
+      <div class="col"><div class="text-muted small">Revenue</div><div class="h4 mb-0">Rs. {{ "%.2f"|format(total_revenue) }}</div></div>
+      <div class="col"><div class="text-muted small">Bills</div><div class="h4 mb-0">{{ total_bills }}</div></div>
+      <div class="col"><div class="text-muted small">Avg bill</div><div class="h4 mb-0">Rs. {{ "%.2f"|format(avg_bill) }}</div></div>
+      <div class="col"><div class="text-muted small">Orders</div><div class="h4 mb-0">{{ orders_in_range }}</div></div>
+    </div>
+
+    <h2 class="h6 mt-4">Daily breakdown</h2>
+    {% if daily_rows %}
+      <table class="table table-sm">
+        <thead><tr><th>Date</th><th class="text-end">Bills</th><th class="text-end">Revenue</th><th>Top item</th><th class="text-end">Top qty</th></tr></thead>
+        <tbody>
+          {% for d, bills, rev, top, qty in daily_rows %}
+            <tr>
+              <td>{{ d.strftime("%a %Y-%m-%d") }}</td>
+              <td class="text-end">{{ bills }}</td>
+              <td class="text-end">Rs. {{ "%.2f"|format(rev) }}</td>
+              <td>{{ top }}</td>
+              <td class="text-end">{{ qty }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-muted">No paid bills in this range.</p>
+    {% endif %}
+
+    <h2 class="h6 mt-4">Top items</h2>
+    {% if top_items %}
+      <table class="table table-sm">
+        <thead><tr><th>Item</th><th class="text-end">Qty</th><th class="text-end">Revenue</th></tr></thead>
+        <tbody>
+          {% for name, qty, rev in top_items %}
+            <tr>
+              <td>{{ name }}</td>
+              <td class="text-end">{{ qty }}</td>
+              <td class="text-end">Rs. {{ "%.2f"|format(rev) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+
+    <h2 class="h6 mt-4">Payment methods</h2>
+    <table class="table table-sm">
+      <thead><tr><th>Method</th><th class="text-end">Count</th><th class="text-end">Total</th></tr></thead>
+      <tbody>
+        {% for pm, count, amt in payment_breakdown %}
+          <tr>
+            <td>{{ pm|upper }}</td>
+            <td class="text-end">{{ count }}</td>
+            <td class="text-end">Rs. {{ "%.2f"|format(amt) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

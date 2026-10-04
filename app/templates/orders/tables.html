@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Tables · RestoAuto{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Tables</h1>
+  <a href="{{ url_for('orders.kitchen') }}" class="btn btn-outline-secondary btn-sm">Kitchen view →</a>
+</div>
+
+<div class="row g-3">
+  {% for t in tables %}
+    {% set open = t.current_order %}
+    <div class="col-6 col-md-4 col-lg-3">
+      <div class="card shadow-sm h-100
+                  {% if not t.is_active %}table-card-off
+                  {% elif open %}table-card-open
+                  {% else %}table-card-free{% endif %}">
+        <div class="card-body text-center">
+          <div class="text-muted small text-uppercase fw-semibold" style="letter-spacing:0.05em;">
+            <span class="status-dot
+              {% if not t.is_active %}status-dot-off
+              {% elif open %}status-dot-open
+              {% else %}status-dot-free{% endif %}"></span>
+            Table
+          </div>
+          <div class="display-5 fw-bold">{{ t.number }}</div>
+          <div class="text-muted small">
+            {{ t.location or '' }}{% if t.location %} · {% endif %}seats {{ t.capacity }}
+          </div>
+          <div class="mt-3">
+            {% if not t.is_active %}
+              <span class="badge bg-secondary">disabled</span>
+            {% elif open %}
+              <a href="{{ url_for('orders.order_detail', order_id=open.id) }}"
+                 class="badge bg-warning text-decoration-none text-dark">
+                open #{{ open.id }} — {{ open.status }}
+              </a>
+            {% else %}
+              <span class="badge bg-success">free</span>
+            {% endif %}
+          </div>
+          <div class="mt-3">
+            {% if t.is_active and not open %}
+              <a href="{{ url_for('orders.new_order', table_id=t.id) }}"
+                 class="btn btn-primary btn-sm w-100">+ New order</a>
+            {% elif open %}
+              <a href="{{ url_for('orders.order_detail', order_id=open.id) }}"
+                 class="btn btn-outline-primary btn-sm w-100">Open order</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="card shadow-sm mt-4">
+  <div class="card-body small text-muted">
+    <strong class="text-body me-2">Color key:</strong>
+    <span class="me-3"><span class="status-dot status-dot-free"></span>green = free</span>
+    <span class="me-3"><span class="status-dot status-dot-open"></span>amber = open order</span>
+    <span><span class="status-dot status-dot-off"></span>grey = disabled</span>
+  </div>
+</div>
+{% endblock %}

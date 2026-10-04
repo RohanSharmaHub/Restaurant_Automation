@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+{% block title %}Order #{{ order.id }} · RestoAuto{% endblock %}
+{% block content %}
+<a href="{{ url_for('orders.tables') }}" class="text-muted small">&larr; back to tables</a>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mt-2 mb-3 gap-2">
+  <div>
+    <h1 class="h3 mb-0">Order #{{ order.id }}</h1>
+    <div class="text-muted small">
+      Table {{ order.table.number }} ·
+      taken by {{ order.created_by.username }} ·
+      {{ order.created_at.strftime("%Y-%m-%d %H:%M") }}
+    </div>
+  </div>
+  <div>
+    {% set s = order.status %}
+    <span class="badge
+      {% if s == 'pending' %}bg-secondary
+      {% elif s == 'preparing' %}bg-info text-dark
+      {% elif s == 'ready' %}bg-primary
+      {% elif s == 'served' %}bg-success
+      {% elif s == 'paid' %}bg-dark
+      {% elif s == 'cancelled' %}bg-danger
+      {% else %}bg-light text-dark{% endif %}">
+      {{ s }}
+    </span>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Items</strong></div>
+      {% if order.items %}
+        <ul class="list-group list-group-flush">
+          {% for it in order.items %}
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="fw-bold">{{ it.menu_item.name }}
+                    <span class="text-muted small">× {{ it.quantity }}</span>
+                  </div>
+                  {% if it.notes %}<div class="small text-muted">↳ {{ it.notes }}</div>{% endif %}
+                  <div class="text-muted small">Rs. {{ "%.2f"|format(it.unit_price) }} each</div>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold">Rs. {{ "%.2f"|format(it.line_total) }}</div>
+                  {% if order.status in ('pending', 'preparing')
+                        and (current_user.is_manager or order.created_by_id == current_user.id) %}
+                    <form method="post" class="d-inline mt-1"
+                          action="{{ url_for('orders.remove_item', order_id=order.id, item_id=it.id) }}">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="btn btn-sm btn-link text-danger p-0" type="submit">remove</button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+        <div class="card-footer d-flex justify-content-between">
+          <strong>Subtotal</strong>
+          <strong>Rs. {{ "%.2f"|format(order.total) }}</strong>
+        </div>
+      {% else %}
+        <div class="card-body text-muted">No items yet. Add some below.</div>
+      {% endif %}
+    </div>
+
+    {% if order.status in ('pending', 'preparing') %}
+      <div class="card shadow-sm mt-3">
+        <div class="card-body">
+          <h2 class="h6 mb-3">Add another item</h2>
+          <form method="post" action="{{ url_for('orders.add_item', order_id=order.id) }}"
+                class="row g-2 align-items-end">
+            {{ add_form.hidden_tag() }}
+            <div class="col-md-6">
+              {{ add_form.menu_item_id.label(class="form-label small") }}
+              {{ add_form.menu_item_id(class="form-select form-select-sm") }}
+            </div>
+            <div class="col-md-2">
+              {{ add_form.quantity.label(class="form-label small") }}
+              {{ add_form.quantity(class="form-control form-control-sm", min=1, value=1) }}
+            </div>
+            <div class="col-md-3">
+              {{ add_form.notes.label(class="form-label small") }}
+              {{ add_form.notes(class="form-control form-control-sm", placeholder="optional") }}
+            </div>
+            <div class="col-md-1">
+              <button class="btn btn-primary btn-sm w-100" type="submit">Add</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if order.notes %}
+      <div class="card shadow-sm mt-3">
+        <div class="card-body">
+          <div class="text-muted small">General notes</div>
+          <div>{{ order.notes }}</div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Status</strong></div>
+      <div class="card-body">
+
+        {# --- Pending -> Preparing (waiter or manager) #}
+        {% if order.status == 'pending'
+              and (current_user.is_manager or order.created_by_id == current_user.id) %}
+          <form method="post" action="{{ url_for('orders.change_status', order_id=order.id) }}">
+            {{ status_form.hidden_tag() }}
+            <input type="hidden" name="new_status" value="preparing">
+            <button class="btn btn-info w-100 mb-2" type="submit">Send to kitchen</button>
+          </form>
+        {% endif %}
+
+        {# --- Preparing -> Ready (chef or manager) #}
+        {% if order.status == 'preparing' and (current_user.is_chef or current_user.is_manager) %}
+          <form method="post" action="{{ url_for('orders.change_status', order_id=order.id) }}">
+            {{ status_form.hidden_tag() }}
+            <input type="hidden" name="new_status" value="ready">
+            <button class="btn btn-primary w-100 mb-2" type="submit">Mark ready</button>
+          </form>
+        {% endif %}
+
+        {# --- Ready -> Served (waiter or manager) #}
+        {% if order.status == 'ready'
+              and (current_user.is_manager or order.created_by_id == current_user.id) %}
+          <form method="post" action="{{ url_for('orders.change_status', order_id=order.id) }}">
+            {{ status_form.hidden_tag() }}
+            <input type="hidden" name="new_status" value="served">
+            <button class="btn btn-success w-100 mb-2" type="submit">Mark served</button>
+          </form>
+        {% endif %}
+
+        {% if order.status == 'served' %}
+          {% if order.bill %}
+            <a href="{{ url_for('billing.bill_detail', bill_id=order.bill.id) }}"
+               class="btn btn-outline-primary w-100 mb-2">View bill #{{ order.bill.id }}</a>
+          {% else %}
+            <a href="{{ url_for('billing.generate', order_id=order.id) }}"
+               class="btn btn-success w-100 mb-2">Generate bill</a>
+          {% endif %}
+        {% endif %}
+
+        {% if order.status == 'paid' %}
+          <a href="{{ url_for('billing.bill_detail', bill_id=order.bill.id) }}"
+             class="btn btn-dark w-100 mb-2">View paid bill #{{ order.bill.id }}</a>
+        {% endif %}
+
+        {% if order.status == 'cancelled' %}
+          <div class="alert alert-danger small mb-0">Cancelled.</div>
+        {% endif %}
+
+        {% if current_user.is_manager and order.status not in ('paid', 'cancelled') %}
+          <hr>
+          <form method="post" action="{{ url_for('orders.cancel', order_id=order.id) }}"
+                onsubmit="return confirm('Cancel order #{{ order.id }}?');">
+            {{ status_form.hidden_tag() }}
+            <button class="btn btn-outline-danger w-100" type="submit">Cancel order</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card shadow-sm mt-3">
+      <div class="card-header"><strong>Timeline</strong></div>
+      <ul class="list-group list-group-flush small">
+        <li class="list-group-item">Created — {{ order.created_at.strftime("%H:%M") }}</li>
+        {% if order.served_at %}
+          <li class="list-group-item">Served — {{ order.served_at.strftime("%H:%M") }}</li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

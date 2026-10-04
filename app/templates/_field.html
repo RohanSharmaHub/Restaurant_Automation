@@ -1,0 +1,40 @@
+{# Renders a labelled Bootstrap 5 form field with errors.
+   Usage:
+     {% include "_field.html" with context %}
+     {% with field=form.name, label="Name", hint="Optional help text" %}
+       {% include "_field.html" %}
+     {% endwith %}
+#}
+{% if field is defined %}
+  <div class="mb-3">
+    {% if label is defined and label %}
+      <label for="{{ field.id }}" class="form-label">{{ label }}</label>
+    {% elif field.label.text %}
+      <label for="{{ field.id }}" class="form-label">{{ field.label.text }}</label>
+    {% endif %}
+
+    {% if field.type == 'BooleanField' %}
+      <div class="form-check">
+        {{ field(class="form-check-input") }}
+        <label class="form-check-label" for="{{ field.id }}">{{ field.label.text or '' }}</label>
+      </div>
+    {% elif field.type == 'SelectField' %}
+      {{ field(class="form-select") }}
+    {% elif field.type == 'TextAreaField' %}
+      {{ field(class="form-control", rows=3) }}
+    {% elif field.type in ('IntegerField', 'DecimalField') %}
+      {{ field(class="form-control", step="0.01" if field.type == 'DecimalField' else None) }}
+    {% else %}
+      {{ field(class="form-control") }}
+    {% endif %}
+
+    {% if hint is defined and hint %}
+      <div class="form-text">{{ hint }}</div>
+    {% endif %}
+    {% if field.errors %}
+      {% for err in field.errors %}
+        <div class="text-danger small mt-1">{{ err }}</div>
+      {% endfor %}
+    {% endif %}
+  </div>
+{% endif %}

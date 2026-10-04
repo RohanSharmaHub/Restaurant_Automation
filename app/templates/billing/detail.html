@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Bill #{{ bill.id }} · RestoAuto{% endblock %}
+{% block content %}
+{% if not print_mode %}
+  <a href="{{ url_for('billing.list_bills') }}" class="text-muted small">&larr; back to bills</a>
+{% endif %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mt-2 mb-3 gap-2">
+  <div>
+    <h1 class="h3 mb-0">Bill #{{ bill.id }}</h1>
+    <div class="text-muted small">
+      Order #{{ bill.order_id }} · Table {{ bill.order.table.number }} ·
+      server {{ bill.order.created_by.username }} ·
+      issued {{ bill.issued_at.strftime("%Y-%m-%d %H:%M") }}
+      {% if bill.is_paid %}
+        · <strong>paid</strong> {{ bill.paid_at.strftime("%Y-%m-%d %H:%M") }} via {{ bill.payment_method|upper }}
+      {% endif %}
+    </div>
+  </div>
+  <div>
+    {% if bill.is_paid %}
+      <span class="badge bg-success">paid</span>
+    {% else %}
+      <span class="badge bg-warning text-dark">unpaid</span>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Items</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for it in bill.order.items %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div>
+              {{ it.menu_item.name }} × {{ it.quantity }}
+              {% if it.notes %}<div class="small text-muted">↳ {{ it.notes }}</div>{% endif %}
+            </div>
+            <div class="text-end">
+              <div>Rs. {{ "%.2f"|format(it.line_total) }}</div>
+              <div class="small text-muted">@ Rs. {{ "%.2f"|format(it.unit_price) }}</div>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+      <div class="card-body">
+        <table class="table table-sm mb-0">
+          <tbody>
+            <tr><td>Subtotal</td><td class="text-end">Rs. {{ "%.2f"|format(bill.subtotal) }}</td></tr>
+            <tr>
+              <td>Tax ({{ "%.2f"|format(bill.tax_percent) }}%)</td>
+              <td class="text-end">Rs. {{ "%.2f"|format(bill.tax_amount) }}</td>
+            </tr>
+            <tr><td>Discount</td><td class="text-end">- Rs. {{ "%.2f"|format(bill.discount) }}</td></tr>
+            <tr class="fw-bold fs-5">
+              <td>Total</td><td class="text-end">Rs. {{ "%.2f"|format(bill.total) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    {% if not bill.is_paid and pay_form %}
+      <div class="card shadow-sm">
+        <div class="card-header"><strong>Mark as paid</strong></div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('billing.pay', bill_id=bill.id) }}">
+            {{ pay_form.hidden_tag() }}
+            <div class="mb-3">
+              {{ pay_form.payment_method.label(class="form-label") }}
+              {{ pay_form.payment_method(class="form-select") }}
+            </div>
+            <button class="btn btn-success w-100" type="submit">Confirm payment</button>
+          </form>
+        </div>
+      </div>
+    {% elif not bill.is_paid %}
+      <div class="alert alert-info small">
+        Your role doesn't permit marking bills as paid.
+      </div>
+    {% endif %}
+
+    {% if not print_mode %}
+      <div class="card shadow-sm mt-3">
+        <div class="card-header"><strong>Actions</strong></div>
+        <div class="card-body d-grid gap-2">
+          <a class="btn btn-outline-primary"
+             href="{{ url_for('billing.pdf', bill_id=bill.id) }}">Download PDF receipt</a>
+          <a class="btn btn-outline-secondary"
+             href="{{ url_for('billing.bill_detail', bill_id=bill.id, print=1) }}"
+             target="_blank">Open print view</a>
+          {% if not bill.is_paid and current_user.is_manager %}
+            <form method="post" action="{{ url_for('billing.void', bill_id=bill.id) }}"
+                  onsubmit="return confirm('Void this unpaid bill?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-outline-danger w-100" type="submit">Void bill</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

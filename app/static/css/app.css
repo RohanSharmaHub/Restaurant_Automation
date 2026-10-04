@@ -1,0 +1,235 @@
+/* RestoAuto — small custom styles on top of Bootstrap 5
+   Warm earthy palette + meaningful semantic colors for menu and tables.
+*/
+
+:root {
+  --rf-brown:        #6b4226;  /* primary brand: deep walnut */
+  --rf-brown-dark:   #4a2c1a;  /* hover / focus */
+  --rf-terracotta:   #c8612d;  /* accent: terracotta */
+  --rf-cream:        #f8f1e7;  /* light surface */
+  --rf-cream-2:      #efe4d2;  /* slightly darker surface */
+  --rf-ink:          #2b1d12;  /* primary text on light */
+  --rf-muted:        #6c5b48;  /* muted text */
+  --rf-rule:         #d8c9b1;  /* hairlines */
+
+  --rf-veg:          #2f7d32;  /* veg badge (green) */
+  --rf-veg-bg:       #e6f4ea;
+  --rf-nonveg:       #b71c1c;  /* non-veg badge (red) */
+  --rf-nonveg-bg:    #fde8e8;
+
+  --rf-table-free:   #198754;  /* green = free */
+  --rf-table-open:   #d97706;  /* amber = open */
+  --rf-table-off:    #6c757d;  /* grey = disabled */
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--rf-cream);
+  color: var(--rf-ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+main { flex: 1; }
+
+main > .container,
+main > .container-fluid { padding-top: 1.5rem; padding-bottom: 2rem; }
+
+/* ---------- Brand overrides for Bootstrap primary color ---------- */
+.btn-primary,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--rf-brown);
+  border-color: var(--rf-brown);
+  color: #fff;
+}
+.btn-primary:hover { background-color: var(--rf-brown-dark); border-color: var(--rf-brown-dark); }
+.btn-outline-primary { color: var(--rf-brown); border-color: var(--rf-brown); }
+.btn-outline-primary:hover { background-color: var(--rf-brown); border-color: var(--rf-brown); color: #fff; }
+.btn-link { color: var(--rf-brown); }
+
+.text-primary { color: var(--rf-brown) !important; }
+.bg-primary { background-color: var(--rf-brown) !important; }
+.border-primary { border-color: var(--rf-brown) !important; }
+
+a { color: var(--rf-brown); }
+a:hover { color: var(--rf-brown-dark); }
+
+/* ---------- Navbar ---------- */
+.navbar-rf {
+  background: #fff;
+  border-bottom: 1px solid var(--rf-rule);
+}
+.navbar-rf .navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--rf-brown);
+}
+.navbar-rf .nav-link {
+  color: var(--rf-ink);
+  font-weight: 500;
+}
+.navbar-rf .nav-link:hover { color: var(--rf-brown); }
+.navbar-rf .nav-link.active {
+  color: var(--rf-brown);
+  font-weight: 600;
+  border-bottom: 2px solid var(--rf-brown);
+}
+
+.navbar-rf .role-pill {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  background: var(--rf-cream-2);
+  color: var(--rf-brown);
+  border-radius: 999px;
+}
+
+/* ---------- Footer ---------- */
+footer.site-footer {
+  background: #fff;
+  border-top: 1px solid var(--rf-rule);
+  color: var(--rf-muted);
+}
+
+/* ---------- Cards & surfaces ---------- */
+.card {
+  border: 1px solid var(--rf-rule);
+  background: #fff;
+  border-radius: 0.5rem;
+}
+.card-header {
+  background: var(--rf-cream);
+  border-bottom: 1px solid var(--rf-rule);
+  font-weight: 600;
+}
+.section-title {
+  font-weight: 600;
+  color: var(--rf-ink);
+  margin-bottom: 1rem;
+}
+.text-muted { color: var(--rf-muted) !important; letter-spacing: 0.01em; }
+
+/* ---------- Meaningful color coding: MENU ---------- */
+/* Veg / non-veg badges. Color is a safety cue, not decoration. */
+.diet-veg {
+  background: var(--rf-veg-bg);
+  color: var(--rf-veg);
+  border: 1px solid var(--rf-veg);
+}
+.diet-nonveg {
+  background: var(--rf-nonveg-bg);
+  color: var(--rf-nonveg);
+  border: 1px solid var(--rf-nonveg);
+}
+.diet-badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.25rem;
+}
+.veg-dot, .nonveg-dot {
+  display: inline-block;
+  width: 0.7rem; height: 0.7rem;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 0.35rem;
+  border: 1px solid currentColor;
+}
+.veg-dot   { background: var(--rf-veg);   color: var(--rf-veg); }
+.nonveg-dot{ background: var(--rf-nonveg); color: var(--rf-nonveg); }
+
+/* 86'd (unavailable) items: visibly faded, dot is grey */
+.item-unavailable { opacity: 0.55; }
+
+/* ---------- Meaningful color coding: TABLES ---------- */
+.table-card-free   { border-left: 4px solid var(--rf-table-free) !important; }
+.table-card-open   { border-left: 4px solid var(--rf-table-open) !important; }
+.table-card-off    { border-left: 4px solid var(--rf-table-off)  !important; opacity: 0.6; }
+
+.status-dot {
+  display: inline-block; width: 0.6rem; height: 0.6rem;
+  border-radius: 50%; margin-right: 0.4rem; vertical-align: middle;
+}
+.status-dot-free   { background: var(--rf-table-free); }
+.status-dot-open   { background: var(--rf-table-open); }
+.status-dot-off    { background: var(--rf-table-off); }
+
+/* ---------- Status badges (orders, bills) ---------- */
+.status-pending   { background: #6c757d; }
+.status-preparing { background: #0dcaf0; color: #000; }
+.status-ready     { background: var(--rf-brown); }
+.status-served    { background: #198754; }
+.status-paid      { background: #212529; }
+.status-cancelled { background: #dc3545; }
+
+/* ---------- Bar chart (dashboard) ---------- */
+.text-bar-chart { font-variant-numeric: tabular-nums; }
+.text-bar-chart .bar-track {
+  background: var(--rf-cream-2);
+  border-radius: 0.25rem;
+  height: 1.25rem;
+  overflow: hidden;
+}
+.text-bar-chart .bar-fill {
+  background: var(--rf-brown);
+  height: 100%;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+/* ---------- Landing page ---------- */
+.hero {
+  background: linear-gradient(180deg, var(--rf-cream) 0%, #fff 100%);
+  border-bottom: 1px solid var(--rf-rule);
+}
+.hero h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--rf-ink);
+}
+.hero .lead { color: var(--rf-muted); max-width: 32rem; }
+
+.feature-card {
+  background: #fff;
+  border: 1px solid var(--rf-rule);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  height: 100%;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(107, 66, 38, 0.08);
+}
+.feature-icon {
+  width: 3rem; height: 3rem;
+  border-radius: 0.5rem;
+  background: var(--rf-cream-2);
+  color: var(--rf-brown);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.mode-tabs .nav-link {
+  color: var(--rf-muted);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 0.5rem 1.25rem;
+}
+.mode-tabs .nav-link.active {
+  background: var(--rf-brown);
+  color: #fff;
+}
+.mode-panel {
+  background: #fff;
+  border: 1px solid var(--rf-rule);
+  border-radius: 1rem;
+  padding: 2rem;
+}

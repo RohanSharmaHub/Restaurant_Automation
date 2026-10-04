@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Orders · RestoAuto{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">
+    Orders
+    {% if scope == 'mine' %}<small class="text-muted">(mine)</small>{% endif %}
+  </h1>
+  <a href="{{ url_for('orders.tables') }}" class="btn btn-primary">+ New order</a>
+</div>
+
+{% if scope == 'all' %}
+  <form class="mb-3" method="get">
+    <div class="btn-group flex-wrap" role="group">
+      <a class="btn btn-sm {% if not active_status %}btn-dark{% else %}btn-outline-dark{% endif %}"
+         href="{{ url_for('orders.list_orders') }}">All</a>
+      {% for s in statuses %}
+        <a class="btn btn-sm {% if active_status == s.value %}btn-dark{% else %}btn-outline-dark{% endif %}"
+           href="{{ url_for('orders.list_orders', status=s.value) }}">{{ s.value }}</a>
+      {% endfor %}
+    </div>
+  </form>
+{% endif %}
+
+{% if orders %}
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table mb-0 align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>#</th><th>Table</th><th>Status</th><th>Items</th>
+            <th>Total</th><th>By</th><th>Created</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for o in orders %}
+            <tr>
+              <td><strong>{{ o.id }}</strong></td>
+              <td>{{ o.table.number }}</td>
+              <td>
+                <span class="badge
+                  {% if o.status == 'pending' %}bg-secondary
+                  {% elif o.status == 'preparing' %}bg-info text-dark
+                  {% elif o.status == 'ready' %}bg-primary
+                  {% elif o.status == 'served' %}bg-success
+                  {% elif o.status == 'paid' %}bg-dark
+                  {% elif o.status == 'cancelled' %}bg-danger{% endif %}">
+                  {{ o.status }}
+                </span>
+              </td>
+              <td>{{ o.items|length }}</td>
+              <td>Rs. {{ "%.2f"|format(o.total) }}</td>
+              <td class="small text-muted">{{ o.created_by.username }}</td>
+              <td class="small text-muted">{{ o.created_at.strftime("%m-%d %H:%M") }}</td>
+              <td>
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{{ url_for('orders.order_detail', order_id=o.id) }}">Open</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% else %}
+  <div class="alert alert-light text-center">
+    No orders yet. Head to <a href="{{ url_for('orders.tables') }}">Tables</a> to start one.
+  </div>
+{% endif %}
+{% endblock %}

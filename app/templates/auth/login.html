@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Sign in · RestoAuto{% endblock %}
+{% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="text-center mb-4 mt-3">
+        <i class="bi bi-cup-hot-fill" style="font-size: 2.5rem; color: var(--rf-brown);"></i>
+        <h1 class="h3 mt-2 mb-1">RestoAuto</h1>
+        <p class="text-muted small mb-0">Operator console</p>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h2 class="h5 mb-3">Sign in</h2>
+          <p class="text-muted small">Use your team credentials to continue.</p>
+
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.username.label(class="form-label") }}
+              {{ form.username(class="form-control", autofocus=true) }}
+              {% for err in form.username.errors %}
+                <div class="text-danger small mt-1">{{ err }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="mb-3">
+              {{ form.password.label(class="form-label") }}
+              {{ form.password(class="form-control") }}
+              {% for err in form.password.errors %}
+                <div class="text-danger small mt-1">{{ err }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="form-check mb-3">
+              {{ form.remember(class="form-check-input") }}
+              <label class="form-check-label" for="{{ form.remember.id }}">{{ form.remember.label.text }}</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="bi bi-box-arrow-in-right me-1"></i>Sign in
+            </button>
+          </form>
+        </div>
+        <div class="card-footer bg-white text-muted small text-center py-3">
+          Default admin: <code>admin</code> / <code>admin123</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

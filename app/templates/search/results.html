@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Search · RestoAuto{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Search</h1>
+
+<form class="mb-4" method="get">
+  <div class="input-group">
+    <input class="form-control" type="text" name="q" value="{{ q|e }}"
+           placeholder="Search menu items, order #, bill #, or notes…" autofocus>
+    <button class="btn btn-primary" type="submit">Search</button>
+  </div>
+</form>
+
+{% if not q %}
+  <div class="alert alert-light">Type a query above. Try a menu item name like "biryani" or an order number like "1".</div>
+{% else %}
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between">
+          <strong>Menu items</strong>
+          <span class="badge bg-secondary">{{ results.menu|length }}</span>
+        </div>
+        {% if results.menu %}
+          <ul class="list-group list-group-flush">
+            {% for it in results.menu %}
+              <li class="list-group-item d-flex justify-content-between">
+                <a href="{{ url_for('menu.item_detail', item_id=it.id) }}">{{ it.name }}</a>
+                <span class="text-muted small">Rs. {{ "%.2f"|format(it.price) }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="card-body text-muted small">No matches.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between">
+          <strong>Orders</strong>
+          <span class="badge bg-secondary">{{ results.orders|length }}</span>
+        </div>
+        {% if results.orders %}
+          <ul class="list-group list-group-flush">
+            {% for o in results.orders %}
+              <li class="list-group-item">
+                <a href="{{ url_for('orders.order_detail', order_id=o.id) }}">Order #{{ o.id }}</a>
+                <span class="text-muted small">· table {{ o.table.number }} · {{ o.status }}</span>
+                {% if o.notes %}<div class="small text-muted">↳ {{ o.notes }}</div>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="card-body text-muted small">No matches.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between">
+          <strong>Bills</strong>
+          <span class="badge bg-secondary">{{ results.bills|length }}</span>
+        </div>
+        {% if results.bills %}
+          <ul class="list-group list-group-flush">
+            {% for b in results.bills %}
+              <li class="list-group-item d-flex justify-content-between">
+                <a href="{{ url_for('billing.bill_detail', bill_id=b.id) }}">Bill #{{ b.id }}</a>
+                <span>Rs. {{ "%.2f"|format(b.total) }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="card-body text-muted small">No matches.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

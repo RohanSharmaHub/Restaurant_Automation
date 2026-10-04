@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+{% set hide_footer = True %}
+{% block title %}RestoAuto · Restaurant Automation{% endblock %}
+
+{% block content %}
+
+{# ===================== HERO ===================== #}
+<section class="hero py-5">
+  <div class="container py-4">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <span class="text-uppercase text-muted small fw-semibold" style="letter-spacing:0.1em;">
+          Restaurant automation, end to end
+        </span>
+        <h1 class="mt-2 mb-3">Run a busy service<br>without losing your head.</h1>
+        <p class="lead mb-4">
+          RestoAuto connects your floor, kitchen, and back office. Take orders at the table,
+          fire them to the kitchen in one tap, and close the bill in seconds — all from
+          a single console.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-primary btn-lg" href="{{ url_for('auth.login') }}">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Open the console
+          </a>
+          <a class="btn btn-outline-primary btn-lg" href="#how-it-works">
+            How it works <i class="bi bi-arrow-down-short"></i>
+          </a>
+        </div>
+        <p class="text-muted small mt-3 mb-0">
+          Default admin: <code>admin</code> / <code>admin123</code> &nbsp;·&nbsp;
+          See README for other seeded users.
+        </p>
+      </div>
+      <div class="col-lg-5">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <strong>Live operations</strong>
+              <span class="badge status-pending">demo</span>
+            </div>
+            <ul class="list-group list-group-flush small">
+              <li class="list-group-item d-flex justify-content-between">
+                <span><span class="status-dot status-dot-open"></span>Table 3 · Order #12</span>
+                <span class="text-muted">preparing</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span><span class="status-dot status-dot-open"></span>Table 7 · Order #13</span>
+                <span class="text-muted">ready</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span><span class="status-dot status-dot-free"></span>Table 1</span>
+                <span class="text-muted">free</span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between">
+                <span><span class="status-dot status-dot-free"></span>Table 5</span>
+                <span class="text-muted">free</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ===================== HOW IT WORKS ===================== #}
+<section id="how-it-works" class="py-5 bg-white border-top border-bottom">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="h3 fw-bold">How it works</h2>
+      <p class="text-muted mb-0">One workflow. Four roles. Zero spreadsheets.</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+          <h3 class="h6 fw-bold">1. Tables</h3>
+          <p class="text-muted small mb-0">Open a table, see at a glance which ones are free, open, or disabled. Color-coded for speed.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-book-fill"></i></div>
+          <h3 class="h6 fw-bold">2. Menu</h3>
+          <p class="text-muted small mb-0">Categories, items, prices, prep times. 86 an item in one click when you run out — it disappears from the floor instantly.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-fire"></i></div>
+          <h3 class="h6 fw-bold">3. Kitchen</h3>
+          <p class="text-muted small mb-0">Tickets stream to the chef's queue. Pending → preparing → ready → served, with role-gated buttons so nothing moves by accident.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi bi-cash-coin"></i></div>
+          <h3 class="h6 fw-bold">4. Billing</h3>
+          <p class="text-muted small mb-0">Generate a bill from a served order, apply tax and discount, take payment by cash / card / UPI. PDF receipt included.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ===================== MODES ===================== #}
+<section class="py-5">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="h3 fw-bold">Built for the way you actually serve</h2>
+      <p class="text-muted">Three pre-wired modes. Switch any time from the console.</p>
+    </div>
+
+    <ul class="nav mode-tabs justify-content-center mb-4" id="modeTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="dine-tab" data-bs-toggle="tab" data-bs-target="#dine" type="button" role="tab">
+          Dine-in
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="takeaway-tab" data-bs-toggle="tab" data-bs-target="#takeaway" type="button" role="tab">
+          Takeaway
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="quick-tab" data-bs-toggle="tab" data-bs-target="#quick" type="button" role="tab">
+          Quick bill
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="modeTabsContent">
+      <div class="tab-pane fade show active" id="dine" role="tabpanel">
+        <div class="mode-panel">
+          <div class="row align-items-center g-4">
+            <div class="col-md-7">
+              <h3 class="h5 fw-bold">Dine-in</h3>
+              <p class="text-muted">Pick a free table, build the order from the menu, fire to the kitchen, mark each course as it lands. The table card turns amber the moment it has an open order, so the floor never collides.</p>
+              <ul class="list-unstyled small">
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>Color-coded table states (free / open / disabled)</li>
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>Per-item notes ("no onions", "extra spicy")</li>
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>Course-by-course timing for the chef</li>
+              </ul>
+            </div>
+            <div class="col-md-5 text-center">
+              <i class="bi bi-grid-3x3-gap-fill" style="font-size: 6rem; color: var(--rf-cream-2);"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="takeaway" role="tabpanel">
+        <div class="mode-panel">
+          <div class="row align-items-center g-4">
+            <div class="col-md-7">
+              <h3 class="h5 fw-bold">Takeaway</h3>
+              <p class="text-muted">Same flow, no table. The order is tagged "takeaway" so the kitchen knows to package it. The bill prints a pickup label automatically.</p>
+              <ul class="list-unstyled small">
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>No table assignment needed</li>
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>Customer name on the receipt</li>
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>Same chef queue, just labelled</li>
+              </ul>
+            </div>
+            <div class="col-md-5 text-center">
+              <i class="bi bi-bag-fill" style="font-size: 6rem; color: var(--rf-cream-2);"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-pane fade" id="quick" role="tabpanel">
+        <div class="mode-panel">
+          <div class="row align-items-center g-4">
+            <div class="col-md-7">
+              <h3 class="h5 fw-bold">Quick bill</h3>
+              <p class="text-muted">Walked in, paid, walked out. Mark a single order served, generate a bill, take the payment. Three clicks, under 30 seconds.</p>
+              <ul class="list-unstyled small">
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>Cash, card, or UPI payment</li>
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>One-page A4 PDF receipt</li>
+                <li class="mb-1"><i class="bi bi-check2 text-primary me-1"></i>Print-friendly HTML view</li>
+              </ul>
+            </div>
+            <div class="col-md-5 text-center">
+              <i class="bi bi-receipt-cutoff" style="font-size: 6rem; color: var(--rf-cream-2);"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{# ===================== FOOTER (page-local) ===================== #}
+<footer class="site-footer py-5">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="d-flex align-items-center mb-2">
+          <i class="bi bi-cup-hot-fill me-2" style="font-size: 1.5rem; color: var(--rf-brown);"></i>
+          <strong class="fs-5" style="color: var(--rf-brown);">RestoAuto</strong>
+        </div>
+        <p class="text-muted small mb-0">
+          A learning project in Flask + Bootstrap. Built to teach end-to-end restaurant
+          operations: menu, orders, kitchen, billing, reports.
+        </p>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="text-uppercase small fw-bold mb-3" style="letter-spacing:0.1em;">Operations</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-1"><a href="{{ url_for('orders.tables') }}" class="text-muted text-decoration-none">Tables</a></li>
+          <li class="mb-1"><a href="{{ url_for('orders.list_orders') }}" class="text-muted text-decoration-none">Orders</a></li>
+          <li class="mb-1"><a href="{{ url_for('orders.kitchen') }}" class="text-muted text-decoration-none">Kitchen</a></li>
+          <li class="mb-1"><a href="{{ url_for('billing.list_bills') }}" class="text-muted text-decoration-none">Billing</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 class="text-uppercase small fw-bold mb-3" style="letter-spacing:0.1em;">Manage</h6>
+        <ul class="list-unstyled small">
+          <li class="mb-1"><a href="{{ url_for('menu.list_items') }}" class="text-muted text-decoration-none">Menu</a></li>
+          {% if current_user.is_authenticated and current_user.is_manager %}
+            <li class="mb-1"><a href="{{ url_for('reports.sales', preset='7d') }}" class="text-muted text-decoration-none">Reports</a></li>
+            <li class="mb-1"><a href="{{ url_for('main.search') }}" class="text-muted text-decoration-none">Search</a></li>
+          {% endif %}
+        </ul>
+      </div>
+      <div class="col-12 col-lg-4 text-lg-end">
+        <h6 class="text-uppercase small fw-bold mb-3" style="letter-spacing:0.1em;">Get in</h6>
+        <a class="btn btn-primary" href="{{ url_for('auth.login') }}">
+          <i class="bi bi-box-arrow-in-right me-1"></i>Open the console
+        </a>
+      </div>
+    </div>
+    <hr class="my-4">
+    <div class="text-center text-muted small">
+      © {{ now_year }} RestoAuto · MIT
+    </div>
+  </div>
+</footer>
+
+{% endblock %}

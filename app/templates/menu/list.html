@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Menu · RestoAuto{% endblock %}
+{% block content %}
+<div class="container">
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+      <h1 class="h3 mb-0">Menu</h1>
+      <p class="text-muted mb-0">
+        {{ categories|length }} categor{{ 'y' if categories|length == 1 else 'ies' }} ·
+        {{ by_cat.values()|map('length')|sum }} item{{ '' if (by_cat.values()|map('length')|sum) == 1 else 's' }}
+      </p>
+    </div>
+    {% if can_manage %}
+      <div class="d-flex gap-2">
+        <a href="{{ url_for('menu.item_new') }}" class="btn btn-primary">
+          <i class="bi bi-plus-lg me-1"></i>New item
+        </a>
+        <a href="{{ url_for('menu.category_new') }}" class="btn btn-outline-primary">
+          <i class="bi bi-folder-plus me-1"></i>Category
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Filters — color legend explains the diet + availability code #}
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" class="row g-3 align-items-end">
+        <div class="col-md-auto">
+          <div class="form-check">
+            <input type="checkbox" name="available" value="1" {% if only_available %}checked{% endif %} class="form-check-input" id="f-avail">
+            <label class="form-check-label" for="f-avail">Only available</label>
+          </div>
+        </div>
+        <div class="col-md-auto">
+          <div class="form-check">
+            <input type="checkbox" name="veg" value="1" {% if show_veg_only %}checked{% endif %} class="form-check-input" id="f-veg">
+            <label class="form-check-label" for="f-veg">Vegetarian only</label>
+          </div>
+        </div>
+        <div class="col-md-auto d-flex gap-2">
+          <button class="btn btn-primary" type="submit">Apply</button>
+          <a class="btn btn-link" href="{{ url_for('menu.list_items') }}">Reset</a>
+        </div>
+        <div class="col-md-auto ms-md-auto small text-muted">
+          <span class="me-3"><span class="veg-dot"></span>vegetarian</span>
+          <span class="me-3"><span class="nonveg-dot"></span>non-vegetarian</span>
+          <span><i class="bi bi-slash-circle text-danger"></i> 86'd (unavailable)</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% for cat in categories %}
+    <section class="mb-5">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <h2 class="h4 mb-1">{{ cat.name }}</h2>
+          {% if cat.description %}<p class="text-muted mb-0">{{ cat.description }}</p>{% endif %}
+        </div>
+        {% if can_manage %}
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('menu.category_edit', cat_id=cat.id) }}" class="btn btn-sm btn-link">Edit</a>
+            <form method="post" action="{{ url_for('menu.category_delete', cat_id=cat.id) }}"
+                  onsubmit="return confirm('Delete category {{ cat.name|e }}? This fails if it has items.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-sm btn-link text-danger" type="submit">Delete</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+
+      {% set items = by_cat.get(cat.id, []) %}
+      {% if items %}
+        <div class="row g-3">
+          {% for item in items %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card shadow-sm h-100 {% if not item.is_available %}item-unavailable{% endif %}">
+                {% if item.image_url %}
+                  <img src="{{ item.image_url }}" alt="{{ item.name }}" class="card-img-top" style="height: 160px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex justify-content-between align-items-start mb-1">
+                    <a href="{{ url_for('menu.item_detail', item_id=item.id) }}" class="text-decoration-none">
+                      <strong>{{ item.name }}</strong>
+                    </a>
+                    <span class="diet-badge {{ 'diet-veg' if item.is_vegetarian else 'diet-nonveg' }}">
+                      {{ 'veg' if item.is_vegetarian else 'non-veg' }}
+                    </span>
+                  </div>
+                  <div class="text-muted small">{{ item.prep_time_minutes }} min prep</div>
+                  <p class="small text-muted mt-2 mb-3 flex-grow-1">{{ item.description or '' }}</p>
+                  <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                    <strong>Rs. {{ "%.2f"|format(item.price) }}</strong>
+                    {% if item.is_available %}
+                      <span class="text-success small"><span class="veg-dot"></span>available</span>
+                    {% else %}
+                      <span class="text-muted small"><i class="bi bi-slash-circle me-1"></i>86'd</span>
+                    {% endif %}
+                  </div>
+                  {% if can_manage %}
+                    <div class="d-flex gap-2 mt-3">
+                      <a href="{{ url_for('menu.item_edit', item_id=item.id) }}" class="btn btn-sm btn-outline-primary flex-grow-1">Edit</a>
+                      <form method="post" action="{{ url_for('menu.item_toggle_availability', item_id=item.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">
+                          {% if item.is_available %}86 it{% else %}un-86{% endif %}
+                        </button>
+                      </form>
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-muted">No items in this category{% if not loop.first %} (with current filters){% endif %}.</p>
+      {% endif %}
+    </section>
+  {% else %}
+    <div class="card shadow-sm">
+      <div class="card-body text-center py-5">
+        <i class="bi bi-book" style="font-size: 2.5rem; color: var(--rf-rule);"></i>
+        <h3 class="h5 mt-3">No categories yet</h3>
+        <p class="text-muted">Add categories and items to build your menu.</p>
+        {% if can_manage %}
+          <a href="{{ url_for('menu.category_new') }}" class="btn btn-primary">+ New category</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

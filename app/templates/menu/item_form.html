@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · RestoAuto{% endblock %}
+{% block content %}
+<div class="container">
+  <a href="{{ url_for('menu.list_items') }}" class="text-muted small text-decoration-none">
+    <i class="bi bi-arrow-left"></i> back to menu
+  </a>
+  <h1 class="h3 mt-2 mb-4">{{ title }}</h1>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control") }}
+            {% for err in form.name.errors %}<div class="text-danger small mt-1">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6">
+            {{ form.category_id.label(class="form-label") }}
+            {{ form.category_id(class="form-select") }}
+            {% for err in form.category_id.errors %}<div class="text-danger small mt-1">{{ err }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="mt-3">
+          {{ form.description.label(class="form-label") }}
+          {{ form.description(class="form-control", rows=3) }}
+        </div>
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-3">
+            {{ form.price.label(class="form-label") }}
+            <div class="input-group">
+              <span class="input-group-text">Rs.</span>
+              {{ form.price(class="form-control", step="0.01") }}
+            </div>
+            {% for err in form.price.errors %}<div class="text-danger small mt-1">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="col-md-3">
+            {{ form.prep_time_minutes.label(class="form-label") }}
+            <div class="input-group">
+              {{ form.prep_time_minutes(class="form-control") }}
+              <span class="input-group-text">min</span>
+            </div>
+            {% for err in form.prep_time_minutes.errors %}<div class="text-danger small mt-1">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label d-block">Flags</label>
+            <div class="form-check">
+              {{ form.is_vegetarian(class="form-check-input") }}
+              <label class="form-check-label" for="{{ form.is_vegetarian.id }}">Vegetarian</label>
+            </div>
+            <div class="form-check">
+              {{ form.is_available(class="form-check-input") }}
+              <label class="form-check-label" for="{{ form.is_available.id }}">Available for ordering</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          {{ form.image_url.label(class="form-label") }}
+          {{ form.image_url(class="form-control", placeholder="https://...") }}
+          {% for err in form.image_url.errors %}<div class="text-danger small mt-1">{{ err }}</div>{% endfor %}
+          <div class="form-text">Optional. Leave blank for no image.</div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+          <a href="{{ url_for('menu.list_items') }}" class="btn btn-link">Cancel</a>
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check2 me-1"></i>Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

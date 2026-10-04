@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ item.name }} · Menu{% endblock %}
+{% block content %}
+<div class="container">
+  <a href="{{ url_for('menu.list_items') }}" class="text-muted small text-decoration-none">
+    <i class="bi bi-arrow-left"></i> back to menu
+  </a>
+
+  <div class="row g-4 mt-1">
+    {% if item.image_url %}
+      <div class="col-lg-4">
+        <img src="{{ item.image_url }}" alt="{{ item.name }}" class="img-fluid rounded shadow-sm">
+      </div>
+    {% endif %}
+    <div class="{{ 'col-lg-8' if item.image_url else 'col-12' }}">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h1 class="h3 mb-1">{{ item.name }}</h1>
+              <div class="text-muted small">
+                {{ item.category.name }} · {{ item.prep_time_minutes }} min prep
+              </div>
+            </div>
+            <span class="diet-badge {{ 'diet-veg' if item.is_vegetarian else 'diet-nonveg' }}">
+              {{ 'veg' if item.is_vegetarian else 'non-veg' }}
+            </span>
+          </div>
+
+          <p class="mt-3 mb-0">{{ item.description or 'No description.' }}</p>
+
+          <div class="d-flex align-items-center gap-3 mt-4 pt-3 border-top">
+            <div class="h3 mb-0">Rs. {{ "%.2f"|format(item.price) }}</div>
+            {% if item.is_available %}
+              <span class="text-success small"><span class="veg-dot"></span>available</span>
+            {% else %}
+              <span class="text-muted small"><i class="bi bi-slash-circle me-1"></i>86'd — not orderable</span>
+            {% endif %}
+          </div>
+
+          {% if can_manage %}
+            <div class="d-flex flex-wrap gap-2 mt-4">
+              <a href="{{ url_for('menu.item_edit', item_id=item.id) }}" class="btn btn-outline-primary">Edit</a>
+              <form method="post" action="{{ url_for('menu.item_toggle_availability', item_id=item.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="btn btn-outline-secondary" type="submit">
+                  {% if item.is_available %}Mark as 86'd{% else %}Mark as available{% endif %}
+                </button>
+              </form>
+              {% if current_user.is_admin %}
+                <form method="post" action="{{ url_for('menu.item_delete', item_id=item.id) }}"
+                      onsubmit="return confirm('Permanently delete {{ item.name|e }}?');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <button class="btn btn-outline-danger" type="submit">Delete</button>
+                </form>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

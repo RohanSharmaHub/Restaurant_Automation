@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Generate bill · Order #{{ order.id }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="text-muted small">&larr; back to order</a>
+<h1 class="h3 mt-2 mb-3">Generate bill for order #{{ order.id }}</h1>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Items</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for it in order.items %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div>
+              {{ it.menu_item.name }} × {{ it.quantity }}
+              {% if it.notes %}<div class="small text-muted">↳ {{ it.notes }}</div>{% endif %}
+            </div>
+            <div>Rs. {{ "%.2f"|format(it.line_total) }}</div>
+          </li>
+        {% endfor %}
+      </ul>
+      <div class="card-footer d-flex justify-content-between">
+        <strong>Subtotal</strong>
+        <strong>Rs. {{ "%.2f"|format(order.total) }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            {{ form.tax_percent.label(class="form-label") }}
+            <div class="input-group">
+              {{ form.tax_percent(class="form-control", step="0.01") }}
+              <span class="input-group-text">%</span>
+            </div>
+            {% for err in form.tax_percent.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.discount.label(class="form-label") }}
+            <div class="input-group">
+              <span class="input-group-text">Rs.</span>
+              {{ form.discount(class="form-control", step="0.01") }}
+            </div>
+            {% for err in form.discount.errors %}<div class="text-danger small">{{ err }}</div>{% endfor %}
+          </div>
+
+          <div class="d-flex justify-content-between">
+            <a href="{{ url_for('orders.order_detail', order_id=order.id) }}" class="btn btn-link">Cancel</a>
+            <button class="btn btn-primary" type="submit">Generate bill</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

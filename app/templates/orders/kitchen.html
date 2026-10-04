@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Kitchen · RestoAuto{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Kitchen queue</h1>
+  <a href="{{ url_for('orders.tables') }}" class="btn btn-outline-secondary btn-sm">Tables →</a>
+</div>
+
+{% if orders %}
+  <div class="row g-3">
+    {% for o in orders %}
+      <div class="col-md-6 col-xl-4">
+        <div class="card shadow-sm h-100
+                    {% if o.status == 'preparing' %}border-info{% else %}border-secondary{% endif %}">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+              <strong>Order #{{ o.id }}</strong>
+              <span class="text-muted small">· Table {{ o.table.number }}</span>
+            </div>
+            <span class="badge {% if o.status == 'preparing' %}bg-info text-dark{% else %}bg-secondary{% endif %}">
+              {{ o.status }}
+            </span>
+          </div>
+          <ul class="list-group list-group-flush small">
+            {% for it in o.items %}
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <strong>{{ it.menu_item.name }}</strong>
+                    {% if it.menu_item.is_vegetarian %}
+                      <span class="badge bg-success">veg</span>
+                    {% endif %}
+                    <span class="text-muted">× {{ it.quantity }}</span>
+                    {% if it.notes %}<div class="text-muted">↳ {{ it.notes }}</div>{% endif %}
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+          {% if o.notes %}
+            <div class="card-body small"><em>Note:</em> {{ o.notes }}</div>
+          {% endif %}
+          <div class="card-footer d-flex justify-content-between align-items-center">
+            <span class="text-muted small">{{ o.created_at.strftime("%H:%M") }}</span>
+            {% if o.status == 'preparing' and (current_user.is_chef or current_user.is_manager) %}
+              <form method="post" action="{{ url_for('orders.change_status', order_id=o.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="new_status" value="ready">
+                <button class="btn btn-primary btn-sm" type="submit">Mark ready</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="alert alert-light text-center">
+    No orders in the queue. ☕
+  </div>
+{% endif %}
+{% endblock %}

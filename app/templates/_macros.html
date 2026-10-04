@@ -1,0 +1,60 @@
+{# Reusable Bootstrap 5 components. Import with: {% import "_macros.html" as ui %} #}
+
+{# ----- KPI card (dashboard / reports) ----- #}
+{% macro kpi(label, value, sub="") -%}
+  <div class="card shadow-sm h-100">
+    <div class="card-body">
+      <div class="text-muted text-uppercase small fw-semibold" style="letter-spacing:0.05em;">{{ label }}</div>
+      <div class="h3 mb-0 mt-2">{{ value }}</div>
+      {% if sub %}<div class="text-muted small mt-1">{{ sub }}</div>{% endif %}
+    </div>
+  </div>
+{%- endmacro %}
+
+{# ----- Status badge for orders / bills ----- #}
+{% macro status_badge(status) -%}
+  <span class="badge status-{{ status }}">{{ status }}</span>
+{%- endmacro %}
+
+{# ----- Empty state ----- #}
+{% macro empty_state(title, message, cta_url=None, cta_label=None) -%}
+  <div class="card shadow-sm">
+    <div class="card-body text-center py-5">
+      <i class="bi bi-inbox" style="font-size: 2.5rem; color: var(--rf-rule);"></i>
+      <h3 class="h5 mt-3">{{ title }}</h3>
+      <p class="text-muted">{{ message }}</p>
+      {% if cta_url and cta_label %}
+        <a class="btn btn-primary" href="{{ cta_url }}">{{ cta_label }}</a>
+      {% endif %}
+    </div>
+  </div>
+{%- endmacro %}
+
+{# ----- Section header (large) ----- #}
+{% macro page_header(title, subtitle=None) -%}
+  <div class="mb-4">
+    <h1 class="h3 mb-0">{{ title }}</h1>
+    {% if subtitle %}<p class="text-muted mt-2 mb-0">{{ subtitle }}</p>{% endif %}
+  </div>
+{%- endmacro %}
+
+{# ----- Primary action button (link) ----- #}
+{% macro primary_button(url, label, icon=None) -%}
+  <a class="btn btn-primary" href="{{ url }}">
+    {% if icon %}<i class="bi {{ icon }} me-1"></i>{% endif %}{{ label }}
+  </a>
+{%- endmacro %}
+
+{# ----- Outline / secondary button (link) ----- #}
+{% macro secondary_button(url, label, icon=None) -%}
+  <a class="btn btn-outline-primary" href="{{ url }}">
+    {% if icon %}<i class="bi {{ icon }} me-1"></i>{% endif %}{{ label }}
+  </a>
+{%- endmacro %}
+
+{# ----- Danger button (form submit) ----- #}
+{% macro danger_submit(label, icon=None) -%}
+  <button type="submit" class="btn btn-outline-danger">
+    {% if icon %}<i class="bi {{ icon }} me-1"></i>{% endif %}{{ label }}
+  </button>
+{%- endmacro %}

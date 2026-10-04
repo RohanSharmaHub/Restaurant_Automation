@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}New order · Table {{ table.number }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('orders.tables') }}" class="text-muted small">&larr; back to tables</a>
+<h1 class="h3 mt-2 mb-1">New order</h1>
+<div class="text-muted mb-3">Table {{ table.number }} · {{ table.location or '' }} · seats {{ table.capacity }}</div>
+
+<form method="post" novalidate id="new-order-form">
+  {{ form.hidden_tag() }}
+  <input type="hidden" name="table_id" value="{{ table.id }}">
+
+  <div class="card shadow-sm mb-3">
+    <div class="card-body">
+      <label class="form-label">General notes (optional)</label>
+      <input type="text" name="order_notes" class="form-control"
+             placeholder="e.g. birthday cake at end, customer is in a hurry">
+    </div>
+  </div>
+
+  <h2 class="h5 mt-4">Menu</h2>
+  <p class="text-muted small">Set a quantity for any item you want to include. Items with qty 0 are skipped.</p>
+
+  <div class="row g-3">
+    {% for cat_name, items in by_cat.items() %}
+      <div class="col-12">
+        <h3 class="h6 text-uppercase text-muted">{{ cat_name }}</h3>
+      </div>
+      {% for item in items %}
+        <div class="col-md-6 col-lg-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between">
+                <div>
+                  <div class="fw-bold">{{ item.name }}</div>
+                  <div class="text-muted small">Rs. {{ "%.2f"|format(item.price) }} · {{ item.prep_time_minutes }} min</div>
+                </div>
+                <span class="badge {% if item.is_vegetarian %}bg-success{% else %}bg-danger{% endif %}">
+                  {{ 'veg' if item.is_vegetarian else 'non-veg' }}
+                </span>
+              </div>
+              <p class="small text-muted mt-2 mb-2">{{ item.description or '' }}</p>
+              <div class="row g-2 align-items-end">
+                <div class="col-4">
+                  <label class="form-label small mb-1">Qty</label>
+                  <input type="number" min="0" max="99" value="0"
+                         class="form-control form-control-sm qty-input"
+                         data-line="{{ loop.index0 }}">
+                </div>
+                <div class="col-8">
+                  <label class="form-label small mb-1">Notes</label>
+                  <input type="text" class="form-control form-control-sm"
+                         name="notes" placeholder="e.g. no onions">
+                </div>
+                <input type="hidden" name="menu_item_id" value="{{ item.id }}">
+                <input type="hidden" name="quantity" class="real-qty" value="0" data-line="{{ loop.index0 }}">
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  <div class="d-flex justify-content-between mt-4">
+    <a href="{{ url_for('orders.tables') }}" class="btn btn-link">Cancel</a>
+    <button class="btn btn-primary" type="submit">Create order</button>
+  </div>
+</form>
+
+<script>
+  // Mirror the visible qty input into the hidden real-qty input on submit,
+  // so qty=0 items are ignored (we still need the hidden menu_item_id
+  // and notes so empty rows can be safely skipped server-side).
+  document.getElementById('new-order-form').addEventListener('submit', function () {
+    document.querySelectorAll('.qty-input').forEach(function (el) {
+      var idx = el.getAttribute('data-line');
+      var real = document.querySelector('.real-qty[data-line="' + idx + '"]');
+      if (real) real.value = el.value;
+    });
+  });
+</script>
+{% endblock %}

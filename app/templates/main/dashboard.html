@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · RestoAuto{% endblock %}
+{% block content %}
+<div class="container">
+
+  <div class="mb-4">
+    <h1 class="h3 mb-0">Dashboard</h1>
+    <p class="text-muted mb-0">Live operations at a glance.</p>
+  </div>
+
+  {# ---------- KPI ROW ---------- #}
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted text-uppercase small fw-semibold" style="letter-spacing:0.05em;">Today's revenue</div>
+          <div class="h3 mb-0 mt-2">Rs. {{ "%.2f"|format(todays_revenue) }}</div>
+          <div class="text-muted small mt-1">
+            {{ todays_bill_count }} bill{{ '' if todays_bill_count == 1 else 's' }}
+            · avg Rs. {{ "%.2f"|format(todays_avg) }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted text-uppercase small fw-semibold" style="letter-spacing:0.05em;">Today's orders</div>
+          <div class="h3 mb-0 mt-2">{{ todays_orders_count }}</div>
+          <div class="text-muted small mt-1">{{ open_orders_count }} open</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted text-uppercase small fw-semibold" style="letter-spacing:0.05em;">Open by status</div>
+          <div class="mt-2 d-flex flex-wrap gap-2">
+            {% for s, n in by_status.items() %}
+              <span class="badge status-{{ s }}">{{ s }}</span>
+              <span class="small">{{ n }}</span>
+            {% else %}
+              <span class="text-muted small">None</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="text-muted text-uppercase small fw-semibold" style="letter-spacing:0.05em;">86'd items</div>
+          <div class="h3 mb-0 mt-2">{{ unavailable|length }}</div>
+          <div class="text-muted small mt-1">marked unavailable</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if current_user.is_manager and unavailable %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+          <strong>86'd items</strong>
+          <span class="text-muted small ms-2">Click an item to un-86 it.</span>
+        </div>
+      </div>
+      <div class="card-body">
+        {% for it in unavailable %}
+          <form method="post" action="{{ url_for('menu.item_toggle_availability', item_id=it.id) }}" class="d-inline-block me-2 mb-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm btn-outline-danger" type="submit">
+              <i class="bi bi-slash-circle me-1"></i>{{ it.name }}
+            </button>
+          </form>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  {# ---------- 7-DAY REVENUE + TOP ITEMS ---------- #}
+  <div class="row g-3 mb-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <strong>Revenue, last 7 days</strong>
+          {% if current_user.is_manager %}
+            <a class="small" href="{{ url_for('reports.sales', preset='7d') }}">Full report →</a>
+          {% endif %}
+        </div>
+        <div class="card-body text-bar-chart">
+          {% set max_rev = (series|map(attribute=1)|max) or 1 %}
+          {% for d, amt in series %}
+            <div class="d-flex align-items-center mb-2">
+              <div class="text-muted small me-2" style="width: 5.5rem;">{{ d.strftime("%a %m-%d") }}</div>
+              <div class="bar-track flex-grow-1">
+                {% set pct = ((amt / max_rev) * 100) if max_rev else 0 %}
+                <div class="bar-fill" style="width: {{ '%.1f' % pct }}%;"></div>
+              </div>
+              <div class="text-muted small ms-2 text-end" style="width: 6rem;">Rs. {{ "%.0f"|format(amt) }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header"><strong>Top items (7d)</strong></div>
+        <div class="card-body">
+          {% if top_items %}
+            <ol class="ps-3 mb-0">
+              {% for name, qty in top_items %}
+                <li class="d-flex justify-content-between mb-1">
+                  <span>{{ name }}</span>
+                  <span class="text-muted small">× {{ qty }}</span>
+                </li>
+              {% endfor %}
+            </ol>
+          {% else %}
+            <p class="text-muted small mb-0">No orders in the last 7 days.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ---------- RECENT BILLS + QUICK ACTIONS ---------- #}
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header"><strong>Recent bills</strong></div>
+        <div class="card-body p-0">
+          {% if recent_bills %}
+            <ul class="list-group list-group-flush">
+              {% for b in recent_bills %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <a href="{{ url_for('billing.bill_detail', bill_id=b.id) }}" class="text-decoration-none">
+                      <strong>Bill #{{ b.id }}</strong>
+                    </a>
+                    <div class="text-muted small">
+                      order #{{ b.order_id }} · table {{ b.order.table.number }} · {{ b.payment_method|upper }}
+                    </div>
+                  </div>
+                  <div class="text-end">
+                    <div><strong>Rs. {{ "%.2f"|format(b.total) }}</strong></div>
+                    <div class="text-muted small">{{ b.paid_at.strftime("%H:%M") }}</div>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <div class="card-body">
+              <p class="text-muted small mb-0">No paid bills yet.</p>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-header"><strong>Quick actions</strong></div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('orders.tables') }}" class="btn btn-light text-start">
+              <i class="bi bi-grid-3x3-gap-fill me-2" style="color: var(--rf-table-free);"></i>
+              Tables — take a new order
+            </a>
+            <a href="{{ url_for('orders.kitchen') }}" class="btn btn-light text-start">
+              <i class="bi bi-fire me-2" style="color: var(--rf-table-open);"></i>
+              Kitchen queue
+            </a>
+            <a href="{{ url_for('billing.list_bills') }}" class="btn btn-light text-start">
+              <i class="bi bi-cash-coin me-2" style="color: var(--rf-brown);"></i>
+              Bills
+            </a>
+            {% if current_user.is_manager %}
+              <a href="{{ url_for('reports.sales', preset='7d') }}" class="btn btn-light text-start">
+                <i class="bi bi-bar-chart me-2" style="color: var(--rf-brown);"></i>
+                Sales report
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

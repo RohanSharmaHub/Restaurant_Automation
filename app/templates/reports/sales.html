@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Sales report · RestoAuto{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 mb-0">Sales report</h1>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm"
+       href="{{ url_for('reports.sales_print', preset=form.preset.data, start=form.start.data, end=form.end.data) }}"
+       target="_blank">Print view</a>
+    <a class="btn btn-primary btn-sm"
+       href="{{ url_for('reports.sales_csv', preset=form.preset.data, start=form.start.data, end=form.end.data) }}">Download CSV</a>
+  </div>
+</div>
+
+<form class="card card-body mb-4" method="get">
+  <div class="row g-2 align-items-end">
+    <div class="col-md-3">
+      {{ form.preset.label(class="form-label small") }}
+      {{ form.preset(class="form-select form-select-sm") }}
+    </div>
+    <div class="col-md-3">
+      {{ form.start.label(class="form-label small") }}
+      {{ form.start(class="form-control form-control-sm") }}
+    </div>
+    <div class="col-md-3">
+      {{ form.end.label(class="form-label small") }}
+      {{ form.end(class="form-control form-control-sm") }}
+    </div>
+    <div class="col-md-3 d-flex gap-2">
+      <button class="btn btn-dark btn-sm w-100" type="submit">Apply</button>
+      <a class="btn btn-link btn-sm" href="{{ url_for('reports.sales') }}">Reset</a>
+    </div>
+  </div>
+  <div class="form-text mt-2">
+    Showing <strong>{{ start.strftime("%Y-%m-%d %H:%M") }}</strong> to
+    <strong>{{ end.strftime("%Y-%m-%d %H:%M") }}</strong>
+    ({{ (end - start).days + 1 }} day{{ '' if (end - start).days == 0 else 's' }})
+  </div>
+</form>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3 col-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Revenue</div>
+        <div class="h3 mb-0">Rs. {{ "%.2f"|format(total_revenue) }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Bills paid</div>
+        <div class="h3 mb-0">{{ total_bills }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Average bill</div>
+        <div class="h3 mb-0">Rs. {{ "%.2f"|format(avg_bill) }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3 col-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <div class="text-muted small">Orders taken</div>
+        <div class="h3 mb-0">{{ orders_in_range }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Daily breakdown</strong></div>
+      {% if daily_rows %}
+        <div class="table-responsive">
+          <table class="table mb-0 align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Date</th><th class="text-end">Bills</th>
+                <th class="text-end">Revenue</th><th>Top item</th>
+                <th class="text-end">Top qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for d, bills, rev, top, qty in daily_rows %}
+                <tr>
+                  <td>{{ d.strftime("%a %Y-%m-%d") }}</td>
+                  <td class="text-end">{{ bills }}</td>
+                  <td class="text-end">Rs. {{ "%.2f"|format(rev) }}</td>
+                  <td>{{ top }}</td>
+                  <td class="text-end">{{ qty }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="card-body text-muted">No paid bills in this range.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm mb-3">
+      <div class="card-header"><strong>Top items</strong></div>
+      {% if top_items %}
+        <ul class="list-group list-group-flush">
+          {% for name, qty, rev in top_items %}
+            <li class="list-group-item d-flex justify-content-between">
+              <span>{{ name }} <span class="text-muted small">× {{ qty }}</span></span>
+              <span>Rs. {{ "%.2f"|format(rev) }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <div class="card-body text-muted">No items sold in this range.</div>
+      {% endif %}
+    </div>
+
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Payment methods</strong></div>
+      <ul class="list-group list-group-flush">
+        {% for pm, count, amt in payment_breakdown %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>
+              <span class="badge bg-secondary me-1">{{ pm|upper }}</span>
+              {{ count }} bill{{ '' if count == 1 else 's' }}
+            </span>
+            <span>Rs. {{ "%.2f"|format(amt) }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
