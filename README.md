@@ -176,4 +176,4 @@ URL                       Blueprint.endpoint                Who
 
 ## License
 
-MIT — do whatever you want with it.
+MIT — You can use it to get idea and can implement if you want to.
